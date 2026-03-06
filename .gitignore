@@ -35,3 +35,24 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+
+# --- Kubernetes & Minikube (Seguridad) ---
+.kube/
+.minikube/
+config
+*.pem
+*.key
+
+# --- Logs y Temporales (Limpieza) ---
+*.log
+temp/
+tmp/
+
+# --- Archivos de Sistema (Interoperabilidad Windows/Linux) ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- IDEs ---
+.vscode/
+.idea/
