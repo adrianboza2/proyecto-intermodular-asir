@@ -7,12 +7,12 @@ Este proyecto consiste en la implantación de un entorno de **Kubernetes local**
 ## 👥 Equipo de Trabajo
 * **Adrián Boza Suárez (adrianboza2)**: Especialista en Infraestructura y Despliegue (K8s, Docker, Nginx).
 * **Santiago Pérez Cano (santiagoperez27)**: Especialista en Monitoreo y Observabilidad (Prometheus, Grafana).
-* **Sergio López Pérez**: Especialista en Seguridad y Documentación Técnica (NetworkPolicies, Memoria).
+* **Sergio López Pérez (SergioLopez2411)**: Especialista en Seguridad y Documentación Técnica (NetworkPolicies, Memoria).
 
 ---
 
 ## 🛠️ Stack Tecnológico
-- **SO Anfitrión:** Windows / Linux / macOS.
+- **SO Anfitrión:** Windows 10/11.
 - **Virtualización:** VirtualBox (Ubuntu Server 24.04 LTS).
 - **Orquestador:** Minikube (Kubernetes).
 - **Contenedores:** Docker.
