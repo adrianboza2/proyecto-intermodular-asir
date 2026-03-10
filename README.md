@@ -10,7 +10,7 @@
 
 **Implantación de un Entorno Kubernetes Local con Aplicación Web Escalable y Monitoreo en Tiempo Real**
 
-*2.º Curso ASIR — Curso 2024–2025*
+*2.º Curso ASIR — Curso 2025–2026*
 
 </div>
 
