@@ -158,12 +158,22 @@ kubectl get pods -w
 ---
 
 ## 📚 Módulos ASIR Relacionados
+Este proyecto integra conocimientos transversales de los siguientes módulos:
 
-| Módulo | RA | Concepto aplicado |
-|---|---|---|
-| **SRI** | RA1, RA2, RA4 | Services K8s, Nginx, Réplicas |
-| **SAD** | RA1, RA3, RA5 | NetworkPolicies, Self-healing |
-| **ASO** | RA2, RA4, RA6 | Prometheus/Grafana, Docker, YAML |
+### 🌐 Servicios de Red e Internet (SRI)
+* **RA1 (Servicios de Red):** Configuración de `Services` en Kubernetes para exponer la app web al exterior.
+* **RA2 (Servicios Web):** Implantación de un servidor web Nginx contenedorizado.
+* **RA4 (Alta Disponibilidad):** Uso de réplicas de pods para garantizar la disponibilidad del servicio.
+
+### 🛡️ Seguridad y Alta Disponibilidad (SAD)
+* **RA1 (Seguridad en Redes):** Configuración de `Network Policies` para el aislamiento de tráfico entre pods.
+* **RA3 (Continuidad del Negocio):** Implementación de resiliencia mediante la recuperación automática de pods (Self-healing).
+* **RA5 (Recuperación):** Gestión de la persistencia y disponibilidad en entornos de contenedores.
+
+### 🐧 Administración de Sistemas Operativos (ASO)
+* **RA2 (Gestión de Recursos):** Monitoreo de rendimiento (CPU/RAM) mediante el stack Prometheus + Grafana.
+* **RA4 (Virtualización):** Despliegue de infraestructura sobre Docker y orquestación con Minikube.
+* **RA6 (Automatización):** Gestión de la infraestructura mediante código (Manifiestos YAML declarativos).
 
 ---
 
@@ -195,20 +205,4 @@ kubectl describe pod <nombre-pod>
 
 MIT License — Ver [LICENSE](LICENSE) para más detalles.
 
-## 📚 Módulos ASIR Relacionados
-Este proyecto integra conocimientos transversales de los siguientes módulos:
 
-### 🌐 Servicios de Red e Internet (SRI)
-* **RA1 (Servicios de Red):** Configuración de `Services` en Kubernetes para exponer la app web al exterior.
-* **RA2 (Servicios Web):** Implantación de un servidor web Nginx contenedorizado.
-* **RA4 (Alta Disponibilidad):** Uso de réplicas de pods para garantizar la disponibilidad del servicio.
-
-### 🛡️ Seguridad y Alta Disponibilidad (SAD)
-* **RA1 (Seguridad en Redes):** Configuración de `Network Policies` para el aislamiento de tráfico entre pods.
-* **RA3 (Continuidad del Negocio):** Implementación de resiliencia mediante la recuperación automática de pods (Self-healing).
-* **RA5 (Recuperación):** Gestión de la persistencia y disponibilidad en entornos de contenedores.
-
-### 🐧 Administración de Sistemas Operativos (ASO)
-* **RA2 (Gestión de Recursos):** Monitoreo de rendimiento (CPU/RAM) mediante el stack Prometheus + Grafana.
-* **RA4 (Virtualización):** Despliegue de infraestructura sobre Docker y orquestación con Minikube.
-* **RA6 (Automatización):** Gestión de la infraestructura mediante código (Manifiestos YAML declarativos).
