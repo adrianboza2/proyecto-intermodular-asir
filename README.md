@@ -21,6 +21,49 @@
 Implementación de un clúster **Kubernetes local** usando **Minikube** sobre una VM Ubuntu Server (VirtualBox). El proyecto despliega una aplicación web Nginx con **alta disponibilidad** (2 réplicas), un stack de monitoreo completo con **Prometheus y Grafana**, y políticas de seguridad de red, todo ello de forma completamente **gratuita y reproducible** desde cualquier ordenador personal.
 
 ---
+## 🎯 Problema y Solución
+
+### ❌ Situación Tradicional (Sin Orquestación)
+
+En un despliegue clásico de una aplicación web:
+
+| Problema | Consecuencia |
+|----------|-------------|
+| Despliegue manual en un servidor | Errores humanos, inconsistencia entre entornos |
+| Si el servidor falla → la web se cae | Downtime hasta intervención manual |
+| Actualizar Nginx requiere parar el servicio | Tiempo de inactividad obligatorio |
+| ¿Cómo sé si va lento? | Monitorización reactiva, logs manuales |
+| ¿Quién puede acceder? | Firewall básico del SO, sin aislamiento fino |
+
+### ✅ Nuestra Solución con Kubernetes
+
+Este proyecto simula un entorno **cloud-native** a escala educativa, aplicando prácticas de la industria:
+
+| Capacidad | Implementación en el Proyecto | Beneficio |
+|-----------|-------------------------------|-----------|
+| **Alta Disponibilidad** | Deployment con `replicas: 2` + selector de etiquetas | Si un pod falla, el otro sigue sirviendo tráfico |
+| **Auto-recuperación** | `livenessProbe` + `readinessProbe` en puerto 80 | Kubernetes detecta y reinicia pods fallidos automáticamente (< 60s) |
+| **Actualizaciones sin downtime** | Rolling updates nativos de Kubernetes | Nueva versión de Nginx sin interrumpir el servicio |
+| **Observabilidad proactiva** | Prometheus (métricas) + Grafana (dashboards) | Detectamos cuellos de botella antes de que los usuarios se quejen |
+| **Seguridad zero-trust** | NetworkPolicy con reglas ingress/egress explícitas | Solo el tráfico autorizado puede comunicarse entre servicios |
+| **Infraestructura como código** | Manifiestos YAML versionados en Git | Reproducible, auditable y reversible en cualquier momento |
+
+### 🌍 ¿Qué Escenario Real Simula?
+
+    Este proyecto replica, a pequeña escala, el flujo de trabajo de un equipo DevOps en una empresa tech:
+
+    1. Desarrollo → Código en Git
+    2. CI/CD → Validación automática de YAMLs (futuro)
+    3. Despliegue → kubectl apply en cluster Kubernetes
+    4. Operación → Monitoring con alertas visuales
+    5. Seguridad → Políticas de red granulares por servicio
+
+    La diferencia: lo ejecutamos en un portátil con 2GB RAM, no en un cluster de producción de 100 nodos.
+    Pero los conceptos, manifiestos y mentalidad son 100% transferibles.
+
+> 💡 **En esencia**: No gestionamos servidores, definimos el estado deseado y dejamos que Kubernetes lo mantenga.
+
+---
 
 ## 👥 Equipo
 
@@ -198,6 +241,53 @@ kubectl describe pod <nombre-pod>
 # Verificar que el port-forwarding de VirtualBox está configurado
 # Puerto anfitrión 8080 → Puerto invitado 30000
 ```
+
+---
+
+## 🚀 Mejoras Futuras (Roadmap)
+
+Este proyecto es una base sólida que puede evolucionar en múltiples direcciones. Aquí proponemos mejoras organizadas por complejidad:
+
+### 🔧 Corto Plazo (1-2 meses)
+
+| Mejora | Impacto | Implementación Sugerida |
+|--------|---------|------------------------|
+| **Annotations para Prometheus** | Alta | Añadir `prometheus.io/scrape: "true"` en el deployment de Nginx para discovery automático |
+| **Namespace dedicado** | Media | Mover todos los recursos a `namespace: asir-project` para aislamiento lógico |
+| **ResourceQuotas** | Media | Limitar CPU/RAM del namespace para evitar que un pod sature la VM |
+| **Validación automática de YAML** | Media | Script `scripts/lint-yaml.sh` con `yamllint` o `kubeconform` en pre-commit |
+| **Plantillas GitHub** | Baja | `.github/PULL_REQUEST_TEMPLATE.md` para estandarizar contribuciones |
+
+### ⚙️ Medio Plazo (3-6 meses)
+
+| Mejora | Impacto | Implementación Sugerida |
+|--------|---------|------------------------|
+| **Horizontal Pod Autoscaler (HPA)** | Alta | Escalar automáticamente de 2 → 5 réplicas si CPU > 70% |
+| **Volúmenes Persistentes (PVC)** | Alta | Retener dashboards de Grafana y datos de Prometheus tras reinicios |
+| **Ingress Controller** | Media | Reemplazar NodePort por Nginx Ingress + reglas de host/path |
+| **Cert-Manager + Let's Encrypt** | Media | HTTPS automático con certificados válidos para demo pública |
+| **Pipeline CI/CD básico** | Media | GitHub Actions que valide YAMLs y despliegue en Minikube tras push a main |
+
+### 🌐 Largo Plazo (6-12 meses)
+
+| Mejora | Impacto | Implementación Sugerida |
+|--------|---------|------------------------|
+| **Migrar a cluster multi-nodo** | Crítico para HA real | Minikube no tolera fallos de nodo; usar k3s o cloud (AKS/EKS/GKE) |
+| **GitOps con ArgoCD o Flux** | Transformador | Sincronización automática cluster ↔ Git; cero kubectl manual |
+| **Service Mesh (Istio/Linkerd)** | Avanzado | Observabilidad avanzada, mTLS, tráfico canary, retries automáticos |
+| **Logging centralizado (ELK/Loki)** | Operativo | Agregar logs de todos los pods en un dashboard único de búsqueda |
+| **Preparar certificación CKA** | Profesional | Usar este proyecto como base de estudio para Certified Kubernetes Administrator |
+
+### 🧭 ¿Por dónde empezar?
+
+Recomendamos este orden de priorización:
+
+    Fase 1: Base actual → Annotations + Namespace + ResourceQuotas
+    Fase 2: HPA + PVC + Ingress + HTTPS
+    Fase 3: CI/CD básico con GitHub Actions
+    Fase 4: GitOps + Service Mesh (avanzado)
+
+Cada paso añade valor tangible y prepara para el siguiente. No es necesario implementar todo: **elige según tus objetivos de aprendizaje**.
 
 ---
 
