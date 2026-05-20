@@ -53,6 +53,14 @@ tmp/
 Thumbs.db
 desktop.ini
 
+# --- Documentación interna (no pública) ---
+AGENTS.md
+PROJECT_CONTEXT.md
+ROADMAP.md
+STRUCTURE.md
+TASKS.md
+WORKFLOW.md
+
 # --- IDEs ---
 .vscode/
 .idea/
