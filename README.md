@@ -83,13 +83,14 @@ Windows 10/11 (Host)
     └── Ubuntu Server 24.04 LTS (NAT + Port Forwarding)
         └── Docker (driver de Minikube)
             └── Minikube (Kubernetes 1 nodo)
-                ├── Namespace: default
-                │   ├── Deployment: nginx (2 réplicas)
-                │   ├── Service: nginx-svc (NodePort)
-                │   └── NetworkPolicy: restrict-ingress
-                └── Namespace: monitoring
-                    ├── Prometheus (scraping de métricas)
-                    └── Grafana (dashboards)
+                └── Namespace: default
+                    ├── Deployment: nginx-web (2 réplicas)
+                    ├── Service: nginx-web (NodePort 30000)
+                    ├── Deployment: prometheus (scraping de métricas)
+                    ├── Service: prometheus (NodePort 31000)
+                    ├── Deployment: grafana (dashboards)
+                    ├── Service: grafana (NodePort 32000)
+                    └── 5 NetworkPolicies (modelo zero-trust)
 ```
 
 ---
@@ -122,7 +123,7 @@ proyecto-intermodular-asir/
 │   └── network/
 │       └── networkpolicy.yaml   # Aislamiento de tráfico
 ├── docs/
-│   └── memoria.docx             # Memoria técnica del proyecto
+│   └── MEMORIA_TECNICA.md        # Memoria técnica del proyecto
 ├── img/
 │   └── ...                      # Capturas de evidencia
 ├── .gitignore
@@ -166,7 +167,7 @@ kubectl get pods -w
 
 ```bash
 kubectl apply -f manifests/monitoring/
-kubectl get pods -n monitoring -w
+kubectl get pods -w
 ```
 
 ### 5. Aplicar políticas de red
@@ -190,7 +191,7 @@ kubectl get networkpolicies
 
 ```bash
 # Simular fallo de un pod
-kubectl delete pod $(kubectl get pods -l app=nginx -o jsonpath='{.items[0].metadata.name}')
+kubectl delete pod -l app=nginx-web --force
 
 # Observar la recuperación automática
 kubectl get pods -w
