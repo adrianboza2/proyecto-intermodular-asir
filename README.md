@@ -123,9 +123,15 @@ proyecto-intermodular-asir/
 │   └── network/
 │       └── networkpolicy.yaml   # Aislamiento de tráfico
 ├── docs/
-│   └── MEMORIA_TECNICA.md        # Memoria técnica del proyecto
+│   ├── Kubernetes_AdrianBS_SantiagoPC_SergioLP.md   # Memoria final del proyecto
+│   ├── Kubernetes_AdrianBS_SantiagoPC_SergioLP.pdf  # Memoria en PDF
+│   ├── DEFENSA.md              # Guía práctica para la defensa
+│   ├── GUION_DEFENSA.md        # Guion de exposición oral
+│   └── Presentacion_Proyecto_Intermodular.pptx       # Presentación diapositivas
 ├── img/
-│   └── ...                      # Capturas de evidencia
+│   ├── 03-nginx-deployment.png  # Evidencias (11 capturas)
+│   ├── ...
+│   └── 11-conectividad-test.png
 ├── .gitignore
 ├── LICENSE
 └── README.md

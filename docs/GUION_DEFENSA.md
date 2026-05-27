@@ -1,23 +1,176 @@
-# GUION_DEFENSA.md — Guion de Exposición Oral
+# 🎤 GUION_DEFENSA.md — Guion Completo de Exposición Oral
 
-> **Duración total estimada:** 10-15 minutos
-> **Formato:** Presentación + Demo en vivo
-> **Orden de intervención:** Adrián → Santiago → Sergio → (todos en demo)
-
----
-
-## 0. PREPARACIÓN (5 min antes de empezar)
-
-- [ ] VM encendida y SSH conectado
-- [ ] `minikube status` → Running
-- [ ] `kubectl get pods` → todos Running (1/1)
-- [ ] NAT VirtualBox configurado (8080→30000, 9090→31000, 3000→32000)
-- [ ] Navegador con pestañas: localhost:8080, localhost:9090/targets, localhost:3000
-- [ ] Terminal con `kubectl get pods -w` preparado para demo de alta disponibilidad
+> **Duración total:** 10-15 minutos
+> **Formato:** Presentación (PPTX) + Demo en vivo
+> **Orden de intervención:** Adrián → Santiago → Sergio → (todos demo)
+> **Fechas defensa:** 28 o 29 de mayo
+> **Presentación:** `docs/Presentacion_Proyecto_Intermodular.pptx`
 
 ---
 
-## 1. INTRODUCCIÓN — ¿Qué es esto? (1 min) — *Cualquiera*
+## Índice
+
+1. [Prerrequisitos del Portátil](#1-prerrequisitos-del-portátil)
+2. [Checklist Pre-Defensa](#2-checklist-pre-defensa)
+3. [Despliegue en Vivo](#3-despliegue-en-vivo)
+4. [Verificación de Servicios](#4-verificación-de-servicios)
+5. [Guion de Exposición Oral](#5-guion-de-exposición-oral)
+6. [Demo de Alta Disponibilidad](#6-demo-de-alta-disponibilidad)
+7. [Errores Comunes y Soluciones](#7-errores-comunes-y-soluciones)
+8. [Preguntas del Tribunal (Q&A)](#8-preguntas-del-tribunal-qa)
+
+---
+
+## 1. Prerrequisitos del Portátil
+
+El portátil del día de la defensa debe tener instalado:
+
+- [ ] VirtualBox 7.x
+- [ ] VM Ubuntu Server 24.04 LTS con Docker Engine, Minikube y kubectl
+- [ ] Proyecto clonado (`git clone https://github.com/adrianboza2/proyecto-intermodular-asir.git`)
+- [ ] Reenvío de puertos NAT configurado (ver sección 3.5)
+
+> Si el repo ya existe: `git pull origin main`
+
+---
+
+## 2. Checklist Pre-Defensa
+
+**Márcatelo 10 minutos antes de empezar:**
+
+### Estado del sistema
+- [ ] VM encendida y SSH conectado (`ssh usuario@localhost -p 2222`)
+- [ ] Minikube running (`minikube status`)
+- [ ] Todos los pods `Running` (`kubectl get pods`)
+- [ ] VirtualBox NAT configurado (8080→30000, 9090→31000, 3000→32000)
+- [ ] Terminal con `kubectl get pods -w` preparado para demo de HA
+
+### Acceso desde navegador
+- [ ] Nginx responde en `http://localhost:8080`
+- [ ] Prometheus targets UP en `http://localhost:9090/targets`
+- [ ] Grafana login ok en `http://localhost:3000` (admin/admin)
+- [ ] Dashboard importado y con datos
+
+### Material de apoyo
+- [ ] Presentación `docs/Presentacion_Proyecto_Intermodular.pptx` abierta
+- [ ] Memoria final `docs/Kubernetes_AdrianBS_SantiagoPC_SergioLP.pdf` disponible
+- [ ] Capturas de evidencia en `img/` (11 archivos)
+- [ ] Repositorio GitHub abierto para mostrar commits
+- [ ] Demo grabada (por si falla el directo)
+- [ ] Reloj/temporizador visible para controlar los 15 minutos
+
+### Reparto de intervenciones
+- [ ] Cada miembro sabe qué va a decir y en qué orden
+- [ ] Comando de HA copiado en portapapeles
+
+---
+
+## 3. Despliegue en Vivo
+
+> Pasos para levantar el proyecto desde cero durante la defensa (si hiciese falta).
+
+### 3.1 Clonar y arrancar Minikube
+
+```bash
+git clone https://github.com/adrianboza2/proyecto-intermodular-asir.git
+cd proyecto-intermodular-asir
+
+minikube start --driver=docker --memory=2048 --cpus=2
+minikube status
+# → host: Running, kubelet: Running, apiserver: Running
+```
+
+### 3.2 Desplegar todo el stack
+
+```bash
+kubectl apply -f manifests/ -R
+```
+
+> **Importante:** el flag `-R` es necesario porque hay subcarpetas (app-web, monitoring, network). Sin él da error `recognized file extensions`.
+
+### 3.3 Esperar a que los pods arranquen
+
+```bash
+kubectl get pods -w
+# Esperar hasta que todos muestren STATUS Running y READY 1/1
+# Ctrl+C para salir del modo watch
+```
+
+### 3.4 Configurar NAT en VirtualBox
+
+Abrir VirtualBox → VM → Configuración → Red → NAT → Reenvío de puertos → Añadir:
+
+| Nombre | Protocolo | Host Port | Guest Port |
+|--------|-----------|-----------|------------|
+| nginx-web | TCP | 8080 | 30000 |
+| prometheus | TCP | 9090 | 31000 |
+| grafana | TCP | 3000 | 32000 |
+
+> **Importante:** Host IP y Guest IP se dejan vacías.
+> **Error típico:** `ERR_CONNECTION_REFUSED` → el NAT no está configurado.
+
+---
+
+## 4. Verificación de Servicios
+
+### 4.1 Pods
+
+```bash
+kubectl get pods
+```
+
+Salida esperada: 4 pods en estado Running (2 nginx-web + 1 prometheus + 1 grafana).
+
+### 4.2 Servicios
+
+```bash
+kubectl get svc
+```
+
+| Nombre | Type | Port(s) |
+|--------|------|---------|
+| nginx-web | NodePort | 80:30000/TCP |
+| prometheus | NodePort | 9090:31000/TCP |
+| grafana | NodePort | 3000:32000/TCP |
+| kubernetes | ClusterIP | 443/TCP |
+
+### 4.3 NetworkPolicies
+
+```bash
+kubectl get networkpolicies
+```
+
+Salida esperada: 5 políticas (default-deny-all, allow-nginx-web, allow-monitoring-ingress x2, allow-prometheus-scrape, allow-dns).
+
+### 4.4 Probar en el navegador
+
+| Servicio | URL | Esperado |
+|----------|-----|----------|
+| Nginx | `http://localhost:8080` | "Welcome to nginx!" |
+| Prometheus | `http://localhost:9090` | UI de Prometheus |
+| Grafana | `http://localhost:3000` | Login (admin / admin) |
+
+### 4.5 Verificar Prometheus targets
+
+1. Abrir `http://localhost:9090`
+2. Ir a **Status** → **Targets**
+3. Verificar que los targets aparecen como `UP` (verde)
+
+### 4.6 Verificar Grafana
+
+1. Abrir `http://localhost:3000` → admin / admin
+2. Ir a **Connections** → **Data sources** → Prometheus
+3. URL: `http://prometheus:9090` → Save & test → "Data source is working"
+4. Ir a **Dashboards** → **Import** → ID `3662` (Prometheus 2.0 Overview)
+5. Si no hay datos: ir a **Explore** → query `up` → Run
+
+---
+
+## 5. Guion de Exposición Oral
+
+### 5.1 INTRODUCCIÓN — ¿Qué es esto? (1 min)
+
+**Quién:** Cualquiera
 
 **Texto sugerido:**
 
@@ -27,7 +180,9 @@
 
 ---
 
-## 2. PROBLEMA Y SOLUCIÓN (1 min) — *Cualquiera*
+### 5.2 PROBLEMA Y SOLUCIÓN (1 min)
+
+**Quién:** Cualquiera
 
 **Texto sugerido:**
 
@@ -41,11 +196,11 @@
 
 ---
 
-## 3. ARQUITECTURA DEL PROYECTO (2 min) — *Adrián*
+### 5.3 ARQUITECTURA DEL PROYECTO (2 min)
 
-**Apoyarse en el diagrama de arquitectura (diapositiva).**
+**Quién:** Adrián
 
-**Texto sugerido:**
+**Apoyarse en el diagrama de arquitectura (diapositiva 3).**
 
 > "La arquitectura es en 4 capas:
 >
@@ -64,9 +219,9 @@
 
 ---
 
-## 4. FASE 1 — INFRAESTRUCTURA Y APP WEB (2 min) — *Adrián*
+### 5.4 FASE 1 — INFRAESTRUCTURA Y APP WEB (2 min)
 
-**Texto sugerido:**
+**Quién:** Adrián
 
 > "Yo me encargué de la infraestructura y el despliegue de la aplicación web. Los puntos clave:
 >
@@ -83,9 +238,9 @@
 
 ---
 
-## 5. FASE 2 — MONITOREO (2 min) — *Santiago*
+### 5.5 FASE 2 — MONITOREO (2 min)
 
-**Texto sugerido:**
+**Quién:** Santiago
 
 > "Yo configuré el stack de monitorización con Prometheus y Grafana.
 >
@@ -101,9 +256,9 @@
 
 ---
 
-## 6. FASE 3 — SEGURIDAD (2 min) — *Sergio*
+### 5.6 FASE 3 — SEGURIDAD (2 min)
 
-**Texto sugerido:**
+**Quién:** Sergio
 
 > "Yo implementé la seguridad de red con 5 NetworkPolicies que siguen el modelo zero-trust:
 >
@@ -121,11 +276,38 @@
 
 ---
 
-## 7. DEMO EN VIVO (3 min) — *Quien maneje el teclado*
+### 5.7 DIFICULTADES Y SOLUCIONES (1 min)
+
+**Quién:** Cada uno cuenta una
+
+| Integrante | Dificultad | Solución |
+|---|---|---|
+| Adrián | Minikube no arrancaba con 1GB RAM | Aumentar a 2GB |
+| Santiago | Prometheus no scrapeaba Nginx | NetworkPolicy bloqueaba el tráfico — añadir regla allow-prometheus-scrape |
+| Sergio | Error al hacer `kubectl apply -f manifests/` sin -R | Leer la documentación y añadir flag -R para subdirectorios |
+| Todo el equipo | NAT mal configurado → ERR_CONNECTION_REFUSED | Verificar puertos anfitrión/invitado en VirtualBox |
+
+---
+
+### 5.8 CONCLUSIONES Y MEJORAS FUTURAS (1 min)
+
+**Quién:** Cualquiera
+
+> "Para terminar, conclusiones:
+>
+> 1. Hemos demostrado que se puede montar un cluster Kubernetes funcional con monitorización y seguridad en un portátil con recursos limitados.
+> 2. Las NetworkPolicies son una herramienta potente pero hay que planificarlas bien.
+> 3. La infraestructura como código (YAML versionado) hace que todo sea reproducible.
+>
+> Como mejoras futuras: añadiríamos un Ingress Controller con HTTPS, escalado automático con HPA, persistencia con PVCs para los datos de Prometheus, y un pipeline CI/CD con GitHub Actions. Pero para el alcance del proyecto, estamos muy satisfechos con el resultado."
+
+---
+
+## 6. Demo de Alta Disponibilidad
 
 **Preparar:** Terminal dividida en 3 paneles (pods, servicios, navegador).
 
-### 7.1 Mostrar estado del cluster (30s)
+### 6.1 Mostrar estado del cluster (30s)
 
 ```bash
 kubectl get pods
@@ -135,25 +317,25 @@ kubectl get networkpolicies
 
 **Texto:** "Aquí vemos los 4 pods en ejecución: 2 de Nginx, 1 de Prometheus, 1 de Grafana. Todos en estado Running. Los servicios están expuestos en sus NodePorts correspondientes. Y las 5 políticas de red aplicadas."
 
-### 7.2 Mostrar Nginx en navegador (30s)
+### 6.2 Mostrar Nginx en navegador (30s)
 
 Abrir `http://localhost:8080`.
 
 **Texto:** "Nuestra web funcionando. Es el Nginx por defecto, pero podría ser cualquier aplicación."
 
-### 7.3 Mostrar Prometheus targets UP (30s)
+### 6.3 Mostrar Prometheus targets UP (30s)
 
 Abrir `http://localhost:9090/targets`.
 
 **Texto:** "Aquí vemos que Prometheus está scrapeando correctamente. Los targets aparecen en verde (UP)."
 
-### 7.4 Mostrar Grafana (30s)
+### 6.4 Mostrar Grafana (30s)
 
 Abrir `http://localhost:3000` → login admin/admin → Dashboard.
 
 **Texto:** "Grafana con el dashboard importado mostrando métricas en tiempo real de nuestro cluster."
 
-### 7.5 Demo de Alta Disponibilidad (1 min)
+### 6.5 Demo de Alta Disponibilidad (1 min)
 
 ```bash
 kubectl delete pod -l app=nginx-web --force
@@ -164,40 +346,27 @@ kubectl get pods -w   # (mostrar cómo aparece uno nuevo automáticamente)
 
 ---
 
-## 8. DIFICULTADES Y SOLUCIONES (1 min) — *Cada uno cuenta una*
+## 7. Errores Comunes y Soluciones
 
-| Integrante | Dificultad | Solución |
+| Error | Causa | Solución |
 |---|---|---|
-| Adrián | Minikube no arrancaba con 1GB RAM | Aumentar a 2GB |
-| Santiago | Prometheus no scrapeaba Nginx | NetworkPolicy bloqueaba el tráfico — añadir regla allow-prometheus-scrape |
-| Sergio | Error al hacer `kubectl apply -f manifests/` sin -R | Leer la documentación y añadir flag -R para subdirectorios |
-| Todos | NAT mal configurado → ERR_CONNECTION_REFUSED | Verificar puertos anfitrión/invitado en VirtualBox |
+| `recognized file extensions` | `kubectl apply -f manifests/` sin -R | Añadir `-R` al comando |
+| `ERR_CONNECTION_REFUSED` en navegador | NAT de VirtualBox no configurado | Configurar reenvío de puertos (8080→30000, 9090→31000, 3000→32000) |
+| `Destination path already exists` | Ya existe el repo clonado | Usar `git pull origin main` en vez de clone |
+| Dashboard "No data" | El dashboard 3662 usa métricas internas de Prometheus | Usar **Explore** con query `up` para ver datos reales |
+| Minikube no arranca | Docker no está corriendo | `systemctl start docker` o verificar `groups $USER` |
+| Pod en estado `Pending` | Falta CPU/RAM | `kubectl describe pod <nombre>` para diagnosticar |
 
 ---
 
-## 9. CONCLUSIONES Y MEJORAS FUTURAS (1 min) — *Cualquiera*
-
-**Texto sugerido:**
-
-> "Para terminar, conclusiones:
->
-> 1. Hemos demostrado que se puede montar un cluster Kubernetes funcional con monitorización y seguridad en un portátil con recursos limitados.
-> 2. Las NetworkPolicies son una herramienta potente pero hay que planificarlas bien.
-> 3. La infraestructura como código (YAML versionado) hace que todo sea reproducible.
->
-> Como mejoras futuras: añadiríamos un Ingress Controller con HTTPS, escalado automático con HPA, persistencia con PVCs para los datos de Prometheus, y un pipeline CI/CD con GitHub Actions. Pero para el alcance del proyecto, estamos muy satisfechos con el resultado."
->
-
----
-
-## 10. PREGUNTAS DEL TRIBUNAL (preparación)
+## 8. Preguntas del Tribunal (Q&A)
 
 Posibles preguntas y respuestas preparadas:
 
 | Pregunta | Respuesta |
 |---|---|
 | ¿Por qué Minikube y no k3s o kind? | Minikube es el estándar educativo, tiene buena documentación y es el que hemos visto en clase. |
-| ¿Cuánto consume el cluster? | Aprox 1.2GB RAM entre todos los pods + sistema. |
+| ¿Cuánto consume el cluster? | Aprox 1.2 GB RAM entre todos los pods + sistema. |
 | ¿Y si un pod de Nginx falla de verdad? | Kubernetes lo reinicia automáticamente (livenessProbe) o lo recrea (ReplicaSet). |
 | ¿Qué seguridad tiene Grafana? | Solo credenciales básicas admin/admin. En producción usaríamos OAuth o secrets externos. |
 | ¿Por qué no usáis namespaces? | Para este proyecto usamos el namespace default por simplicidad. En producción separaríamos por entorno. |
@@ -207,15 +376,4 @@ Posibles preguntas y respuestas preparadas:
 
 ---
 
-## Checklist Pre-Defensa
-
-- [ ] Diapositivas preparadas y probadas en el proyector
-- [ ] Demo grabada (por si el WiFi falla)
-- [ ] Capturas de pantalla en `img/` accesibles
-- [ ] GitHub abierto en el repositorio
-- [ ] VM arrancada y Minikube funcionando
-- [ ] NAT de VirtualBox configurado
-- [ ] Todos los servicios accesibles desde el navegador
-- [ ] Comando `kubectl delete pod -l app=nginx-web --force` copiado en portapapeles
-- [ ] Cada miembro sabe qué va a decir y en qué orden
-- [ ] Reloj/temporizador visible para controlar 15 minutos
+*Documento generado como parte del proyecto intermodular de 2.º ASIR — Curso 2025/2026*
