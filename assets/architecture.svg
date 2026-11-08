@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="445" viewBox="0 0 560 445" role="img" aria-labelledby="t">
+  <title id="t">Architecture: a Service in front of two nginx pods, Prometheus and Grafana, inside a default-deny network</title>
+  <style>
+    :root { --bg:#f6f4ef; --ink:#1b1b1a; --mute:#6b6862; --rule:#c9c4b8; --acc:#c2410c; --box:#ffffff; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#161b22; --ink:#ecebe7; --mute:#9a978f; --rule:#3d444d; --acc:#f0883e; --box:#0d1117; }
+    }
+    .bg{fill:var(--bg)} .ink{fill:var(--ink)} .mute{fill:var(--mute)} .acc{fill:var(--acc)}
+    .box{fill:var(--box);stroke:var(--rule);stroke-width:1.2}
+    .pod{fill:var(--box);stroke:var(--acc);stroke-width:1.6}
+    .ln{stroke:var(--mute);stroke-width:1.2;fill:none}
+    .zone{fill:none;stroke:var(--acc);stroke-width:1.2;stroke-dasharray:5 5}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace}
+    .lab{letter-spacing:.12em}
+  </style>
+  <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a867e"/></marker></defs>
+  <rect class="bg" width="560" height="445"/>
+  <text x="28" y="40" class="mono mute lab" font-size="12">MINIKUBE · UBUNTU SERVER 24.04</text>
+  <rect class="zone" x="20" y="58" width="520" height="356" rx="4"/>
+  <text x="532" y="404" class="mono acc lab" font-size="11" text-anchor="end">DEFAULT-DENY · 6 NETWORKPOLICIES</text>
+
+  <rect class="box" x="44" y="152" width="130" height="56" rx="3"/>
+  <text x="109" y="176" class="mono ink" font-size="14" text-anchor="middle">Service</text>
+  <text x="109" y="195" class="mono mute" font-size="11" text-anchor="middle">NodePort 30000</text>
+
+  <rect class="pod" x="300" y="90" width="210" height="56" rx="3"/>
+  <text x="405" y="114" class="mono ink" font-size="14" text-anchor="middle">nginx · replica 1</text>
+  <text x="405" y="133" class="mono mute" font-size="11" text-anchor="middle">liveness + readiness</text>
+  <rect class="pod" x="300" y="214" width="210" height="56" rx="3"/>
+  <text x="405" y="238" class="mono ink" font-size="14" text-anchor="middle">nginx · replica 2</text>
+  <text x="405" y="257" class="mono mute" font-size="11" text-anchor="middle">liveness + readiness</text>
+  <path class="ln" d="M174 172 C240 172 240 118 298 118" marker-end="url(#a)"/>
+  <path class="ln" d="M174 188 C240 188 240 242 298 242" marker-end="url(#a)"/>
+
+  <rect class="box" x="44" y="320" width="130" height="56" rx="3"/>
+  <text x="109" y="344" class="mono ink" font-size="14" text-anchor="middle">Grafana</text>
+  <text x="109" y="363" class="mono mute" font-size="11" text-anchor="middle">dashboards</text>
+  <rect class="box" x="300" y="320" width="210" height="56" rx="3"/>
+  <text x="405" y="344" class="mono ink" font-size="14" text-anchor="middle">Prometheus</text>
+  <text x="405" y="363" class="mono mute" font-size="11" text-anchor="middle">cAdvisor metrics · RBAC</text>
+  <path class="ln" d="M174 348 L298 348" marker-end="url(#a)"/>
+  <path class="ln" d="M405 318 L405 274" stroke-dasharray="3 4" marker-end="url(#a)"/>
+</svg>
